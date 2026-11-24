@@ -11,7 +11,7 @@ standby_desired_count = 0
 
 # Optional DNS failover
 # hosted_zone_id = "Z0123456789ABCDEFGHIJ"
-# app_hostname   = "app.example.org"
+# app_hostname   = "<app-hostname-in-your-zone>"
 
 # Turn on before storing any real data
 deletion_protection = false

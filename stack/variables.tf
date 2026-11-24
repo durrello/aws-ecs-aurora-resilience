@@ -63,7 +63,7 @@ variable "hosted_zone_id" {
 }
 
 variable "app_hostname" {
-  description = "Hostname for the failover record, for example app.example.org."
+  description = "Hostname for the failover record, a name inside the hosted zone (no scheme)."
   type        = string
   default     = ""
 }
