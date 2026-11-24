@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.15.8"
+      - name: terraform fmt
+        run: terraform fmt -check -recursive
+      - name: terraform init (no backend)
+        working-directory: stack
+        run: terraform init -backend=false -input=false
+      - name: terraform validate
+        working-directory: stack
+        run: terraform validate
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy IaC scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          trivyignores: .trivyignore
+          skip-dirs: stack/.terraform
+          version: v0.76.2
+
+  scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: shellcheck scripts/*.sh
+
+  app-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t ecs-aurora-app:ci app
+      - name: Smoke test /health
+        run: |
+          docker run -d --name app -p 8080:8080 -e DB_HOST=unused -e DB_USER=u -e DB_PASSWORD=p ecs-aurora-app:ci
+          for i in $(seq 1 20); do curl -fsS localhost:8080/health && exit 0; sleep 1; done
+          docker logs app
+          exit 1

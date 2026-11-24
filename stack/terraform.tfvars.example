@@ -1,0 +1,17 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is git-ignored.
+name                      = "ecs-aurora"
+environment               = "demo"
+primary_region            = "eu-west-1"
+secondary_region          = "eu-west-2"
+container_image_primary   = "<account>.dkr.ecr.eu-west-1.amazonaws.com/ecs-aurora-app:<git-sha>"
+container_image_secondary = "<account>.dkr.ecr.eu-west-2.amazonaws.com/ecs-aurora-app:<git-sha>"
+
+# 0 = pilot light (cheapest), 2 = warm standby (fastest recovery)
+standby_desired_count = 0
+
+# Optional DNS failover
+# hosted_zone_id = "Z0123456789ABCDEFGHIJ"
+# app_hostname   = "app.example.org"
+
+# Turn on before storing any real data
+deletion_protection = false
